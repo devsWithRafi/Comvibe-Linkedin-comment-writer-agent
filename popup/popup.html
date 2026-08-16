@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkedIn Comment AI — Settings</title>
+  <link rel="stylesheet" href="popup.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css" integrity="sha512-QeR2VH+lsBE5LSAe1Q5EnTBbe7XTBubt8dG93Y7gidSgdMCr8nVqKcfKAMyN96SV8KDbZVTDXChatu5G2KQGzg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+  <!-- =====================================================================
+       HEADER
+  ====================================================================== -->
+  <header class="popup-header">
+    <div class="popup-header__brand">
+      <span class="popup-header__icon">
+        <i class="fa-brands fa-linkedin"></i>
+      </span>
+      <span class="popup-header__title">Comvibe</span>
+    </div>
+    <label class="toggle" title="Enable or disable the extension on LinkedIn">
+      <input type="checkbox" id="extensionEnabled" role="switch" />
+      <span class="toggle__track">
+        <span class="toggle__thumb"></span>
+      </span>
+      <span class="toggle__label">Active</span>
+    </label>
+  </header>
+
+  <!-- =====================================================================
+       ONBOARDING STATE (shown when no API key is configured)
+  ====================================================================== -->
+  <div class="onboarding" id="onboarding" hidden>
+    <div class="onboarding__icon">🔑</div>
+    <p class="onboarding__text">Add your API key below to start generating AI-powered LinkedIn comments.</p>
+    <div class="onboarding__arrow">↓</div>
+  </div>
+
+  <!-- =====================================================================
+       MAIN FORM
+  ====================================================================== -->
+  <main class="popup-main">
+
+    <!-- ----------------------------------------------------------------
+         A. Provider & Model
+    ---------------------------------------------------------------- -->
+    <section class="section">
+      <h2 class="section__title">Provider &amp; Model</h2>
+
+      <div class="field">
+        <label class="field__label" for="provider">Provider</label>
+        <select class="field__select" id="provider">
+          <option value="openai">OpenAI</option>
+          <option value="groq">Groq</option>
+          <option value="openrouter">OpenRouter</option>
+          <option value="custom">Custom (OpenAI-compatible)</option>
+        </select>
+      </div>
+
+      <!-- Custom Base URL (shown only for "custom" provider) -->
+      <div class="field" id="baseUrlField" hidden>
+        <label class="field__label" for="baseUrl">Base URL</label>
+        <input
+          class="field__input"
+          type="url"
+          id="baseUrl"
+          placeholder="https://your-endpoint.example.com/v1"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <p class="field__hint">
+          The extension will call <code>{baseUrl}/chat/completions</code> and <code>{baseUrl}/models</code>.
+          <br/>
+          <em>Note: you may need to grant host permissions for your custom domain via <code>chrome://extensions</code> or the extension will prompt you.</em>
+        </p>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="apiKey" id="apiKeyLabel">API Key</label>
+        <div class="field__input-group">
+          <input
+            class="field__input field__input--grow"
+            type="password"
+            id="apiKey"
+            placeholder="sk-…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button class="field__icon-btn" id="toggleApiKey" type="button" title="Show/hide API key" aria-label="Show or hide API key">
+            <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+        <p class="field__security-note">
+          🔒 Your API key is stored only on this device and sent directly to the provider you choose — never to any third-party server.
+        </p>
+      </div>
+
+      <div class="field">
+        <div class="field__row">
+          <div class="field__col">
+            <label class="field__label" for="model">Model</label>
+            <select class="field__select" id="model" disabled>
+              <option value="">— fetch models first —</option>
+            </select>
+          </div>
+          <button class="btn btn--secondary btn--sm" id="fetchModelsBtn" type="button" title="Fetch available models for the selected provider">
+            <span id="fetchModelsBtnContent">Fetch Models</span>
+          </button>
+        </div>
+        <p class="field__error" id="modelsError" hidden></p>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ----------------------------------------------------------------
+         B. System Prompt
+    ---------------------------------------------------------------- -->
+    <section class="section">
+      <h2 class="section__title">System Prompt</h2>
+      <div class="field">
+        <label class="field__label" for="systemPrompt">Instructions for the AI</label>
+        <textarea
+          class="field__textarea"
+          id="systemPrompt"
+          rows="4"
+          placeholder="e.g., You are a thoughtful senior product manager. Reply to LinkedIn posts with concise, insightful comments that add a unique perspective. Avoid generic praise. Max 2–3 sentences."
+        ></textarea>
+        <p class="field__hint field__hint--warn" id="systemPromptWarn" hidden>
+          ⚠️ Comments may be generic without a system prompt.
+        </p>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ----------------------------------------------------------------
+         C. Knowledge Base
+    ---------------------------------------------------------------- -->
+    <section class="section">
+      <h2 class="section__title">Knowledge Base</h2>
+      <div class="field">
+        <label class="field__label" for="knowledgeBase">About You</label>
+        <textarea
+          class="field__textarea"
+          id="knowledgeBase"
+          rows="5"
+          placeholder="Paste info about yourself, your role, your company, your expertise, writing style, or anything the AI should know when writing comments on your behalf."
+        ></textarea>
+        <p class="field__char-count" id="kbCharCount">0 characters</p>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ----------------------------------------------------------------
+         D. Default Preferences
+    ---------------------------------------------------------------- -->
+    <section class="section">
+      <h2 class="section__title">Default Preferences</h2>
+      <div class="field field--row">
+        <div class="field__col">
+          <label class="field__label" for="tone">Default Tone</label>
+          <select class="field__select" id="tone">
+            <option value="Professional">Professional</option>
+            <option value="Casual">Casual</option>
+            <option value="Witty">Witty</option>
+            <option value="Supportive">Supportive</option>
+            <option value="Analytical">Analytical</option>
+            <option value="Contrarian">Contrarian</option>
+          </select>
+        </div>
+        <div class="field__col">
+          <label class="field__label" for="length">Default Length</label>
+          <select class="field__select" id="length">
+            <option value="Short">Short (~1 sentence)</option>
+            <option value="Medium" selected>Medium (~2–3 sentences)</option>
+            <option value="Long">Long (~4–5 sentences)</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =====================================================================
+       FOOTER — Save status toast
+  ====================================================================== -->
+  <footer class="popup-footer">
+    <span class="save-toast" id="saveToast" aria-live="polite"></span>
+  </footer>
+
+  <script src="../lib/storage.js"></script>
+  <script src="../lib/providers.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
