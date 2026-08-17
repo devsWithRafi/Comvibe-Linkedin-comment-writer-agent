@@ -91,7 +91,7 @@ Open any post on LinkedIn and click into the comment box. A small toolbar appear
 ### Load Unpacked (Developer Mode)
 ```bash
 # 1. Clone or download this repo
-git clone https://github.com/yourusername/comvibe-linkedin-comment-writer.git
+git clone https://github.com/devsWithRafi/Comvibe-Linkedin-comment-writer-agent.git
 
 # 2. Open Chrome Extensions
 #    Navigate to: chrome://extensions/
