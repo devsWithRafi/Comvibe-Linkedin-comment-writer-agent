@@ -89,6 +89,12 @@ body {
   letter-spacing: -0.01em;
 }
 
+.popup_header_logo{
+  user-select: none;
+  pointer-events: none;
+  width: 80px;
+}
+
 /* -----------------------------------------------------------------------
    Toggle Switch
    ----------------------------------------------------------------------- */
